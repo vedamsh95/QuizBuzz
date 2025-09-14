@@ -21,13 +21,9 @@ const playerCountInput = document.getElementById('player-count');
 const playerNamesContainer = document.getElementById('player-names-container');
 const categorySelection = document.getElementById('category-selection');
 const startGameBtn = document.getElementById('start-game-btn');
-
-const scoreboardContainer = document.getElementById('scoreboard-container');
-const scoreboardToggle = document.getElementById('scoreboard-toggle');
-const scoreboardPlayers = document.getElementById('scoreboard-players');
 const gameBoard = document.getElementById('game-board');
 const turnIndicator = document.getElementById('turn-indicator');
-
+const scoreboardPlayers = document.getElementById('scoreboard-players');
 const modalOverlay = document.getElementById('question-modal-overlay');
 const questionCard = document.getElementById('question-card');
 const questionText = document.getElementById('question-text');
@@ -36,27 +32,27 @@ const answerText = document.getElementById('answer-text');
 const revealAnswerBtn = document.getElementById('reveal-answer-btn');
 const playerScoringContainer = document.getElementById('player-scoring-container');
 const noAnswerBtn = document.getElementById('no-answer-btn');
-const feedbackOverlay = document.getElementById('feedback-overlay');
+const gameOverModal = document.getElementById('game-over-modal');
+const winnerAnnouncement = document.getElementById('winner-announcement');
+const finalScores = document.getElementById('final-scores');
+const playAgainBtn = document.getElementById('play-again-btn');
 
 // Game State
 let players = [];
 let allCategories = [];
-// This is the main change: gameQuestions is now an array of full category objects
-let gameCategories = []; 
+let gameCategories = [];
 let currentTurn = 0;
 let currentQuestion = null;
-const VIBRANT_COLORS = ['#E249A4', '#219EBC', '#FB8500', '#A2FF00', '#9944FF'];
 const DIFFICULTY_LEVELS = [100, 200, 300, 400, 500];
-// --- SETUP PHASE ---
 
+// --- SETUP PHASE ---
 playerCountInput.addEventListener('change', () => {
     const count = playerCountInput.value;
     playerNamesContainer.innerHTML = '';
     for (let i = 1; i <= count; i++) {
         const input = document.createElement('input');
         input.type = 'text';
-        input.placeholder = `Player ${i} Name`;
-        input.id = `player-name-${i}`;
+        input.placeholder = `Player ${i} Identifier`;
         playerNamesContainer.appendChild(input);
     }
 });
@@ -73,13 +69,14 @@ async function loadCategories() {
         card.innerHTML = `
             <input type="checkbox" id="${category.id}" value="${category.name}">
             <h3>${category.name}</h3>
+            <p>${category.description || 'No description available.'}</p>
         `;
         card.addEventListener('click', () => {
             const checkbox = card.querySelector('input');
             const selectedCards = document.querySelectorAll('.category-card.selected').length;
             
             if (!card.classList.contains('selected') && selectedCards >= 5) {
-                alert("You can only select 5 categories.");
+                alert("SYSTEM LIMIT: 5 DATA MODULES MAX.");
                 return;
             }
             card.classList.toggle('selected');
@@ -90,7 +87,6 @@ async function loadCategories() {
 }
 
 // --- GAME START ---
-
 startGameBtn.addEventListener('click', async () => {
     players = Array.from(document.querySelectorAll('#player-names-container input')).map((input, i) => ({
         name: input.value || `Player ${i + 1}`,
@@ -107,7 +103,6 @@ startGameBtn.addEventListener('click', async () => {
     const snapshot = await db.collection('categories').where('name', 'in', selectedCategoryNames).get();
     const fetchedCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    // *** NEW: Process categories to select ONE random question per difficulty ***
     gameCategories = [];
     for (const category of fetchedCategories) {
         const processedCategory = { ...category, questions: {} };
@@ -117,16 +112,15 @@ startGameBtn.addEventListener('click', async () => {
             const questionPool = category.questions[level];
             if (!questionPool || questionPool.length === 0) {
                 isComplete = false;
-                break; // Exit if any difficulty level has no questions
+                break;
             }
-            // Select one random question from the pool
             const randomIndex = Math.floor(Math.random() * questionPool.length);
             processedCategory.questions[level] = questionPool[randomIndex];
         }
 
         if (!isComplete) {
-            alert(`The category "${category.name}" is missing questions for one or more difficulty levels. Please complete it in the admin panel.`);
-            return; // Stop the game from starting
+            alert(`The category "${category.name}" is missing questions. Please complete it in the admin panel.`);
+            return;
         }
         gameCategories.push(processedCategory);
     }
@@ -139,65 +133,60 @@ startGameBtn.addEventListener('click', async () => {
     updateScoreboard();
 });
 
-
 // --- GAMEPLAY ---
-
 function buildGameBoard() {
     gameBoard.innerHTML = '';
-
     gameCategories.forEach((category, index) => {
         const column = document.createElement('div');
-        column.className = 'category-column';
+        column.className = `category-column category-${index + 1}`;
 
         const header = document.createElement('div');
         header.className = 'category-header';
         header.textContent = category.name;
-        header.style.backgroundColor = VIBRANT_COLORS[index % VIBRANT_COLORS.length];
         column.appendChild(header);
         
-        // Loop through difficulty levels to ensure order
-        DIFFICULTY_LEVELS.forEach((level, qIndex) => {
-            // Get the question for the specific level from our new structure
+        DIFFICULTY_LEVELS.forEach(level => {
             const q = category.questions[level];
-            q.points = level; // Add points to the object for later use
+            q.points = level;
 
-            const button = document.createElement('button');
-            button.className = 'question-btn';
-            button.textContent = level;
+            const panel = document.createElement('button');
+            panel.className = 'question-panel';
+            panel.textContent = level;
             
-            const baseColor = VIBRANT_COLORS[index % VIBRANT_COLORS.length];
-            const lightness = 90 - (qIndex * 10);
-            button.style.background = `linear-gradient(180deg, ${adjustColor(baseColor, 20)} ${lightness-20}%, ${baseColor} ${lightness}%)`;
-
-            button.addEventListener('click', () => showQuestion(q, button), { once: true });
-            column.appendChild(button);
+            panel.addEventListener('click', () => showQuestion(q, panel), { once: true });
+            column.appendChild(panel);
         });
         gameBoard.appendChild(column);
     });
- }
+}
 
 function updateScoreboard() {
     scoreboardPlayers.innerHTML = '';
     players.forEach((player, index) => {
         const scoreDiv = document.createElement('div');
         scoreDiv.className = 'player-score';
-        if (index === currentTurn) scoreDiv.classList.add('active');
-        scoreDiv.innerHTML = `<span class="player-name">${player.name}</span><span class="score-value">${player.score}</span>`;
+        if (index === currentTurn) {
+            scoreDiv.classList.add('active');
+        }
+        scoreDiv.innerHTML = `
+            <span class="player-name">${player.name}</span>
+            <span class="score-value">${player.score}</span>
+        `;
         scoreboardPlayers.appendChild(scoreDiv);
     });
-    turnIndicator.textContent = `${players[currentTurn].name}'s Turn to Choose`;
+    turnIndicator.textContent = `ACTIVE PLAYER: ${players[currentTurn].name}`;
 }
 
-function showQuestion(question, button) {
+function showQuestion(question, panel) {
     currentQuestion = question;
     questionText.textContent = question.text;
-    questionPointsEl.textContent = `${question.points} Points`;
+    questionPointsEl.textContent = `${question.points} POINTS`;
     answerText.textContent = question.answer;
 
     questionCard.classList.remove('is-flipped');
     modalOverlay.classList.add('active');
-    button.classList.add('disabled');
-    button.textContent = '';
+    panel.classList.add('disabled');
+    panel.textContent = '';
 }
 
 revealAnswerBtn.addEventListener('click', () => {
@@ -208,24 +197,16 @@ revealAnswerBtn.addEventListener('click', () => {
 function buildScoringControls() {
     playerScoringContainer.innerHTML = '';
     players.forEach((player, index) => {
-        const controlDiv = document.createElement('div');
-        controlDiv.className = 'player-control';
-        controlDiv.innerHTML = `
-            <span class="player-name">${player.name}</span>
-            <button class="control-btn btn-correct" data-player="${index}" data-correct="true">+</button>
-            <button class="control-btn btn-incorrect" data-player="${index}" data-correct="false">-</button>
-        `;
-        playerScoringContainer.appendChild(controlDiv);
+        const controlBtn = document.createElement('button');
+        controlBtn.className = 'btn';
+        controlBtn.textContent = player.name;
+        controlBtn.onclick = () => {
+            const isCorrect = confirm(`Did ${player.name} answer correctly?`);
+            awardPoints(index, isCorrect);
+        };
+        playerScoringContainer.appendChild(controlBtn);
     });
 }
-
-playerScoringContainer.addEventListener('click', (e) => {
-    if (e.target.classList.contains('control-btn')) {
-        const playerIndex = parseInt(e.target.dataset.player);
-        const isCorrect = e.target.dataset.correct === 'true';
-        awardPoints(playerIndex, isCorrect);
-    }
-});
 
 noAnswerBtn.addEventListener('click', () => closeModal());
 
@@ -234,48 +215,44 @@ function awardPoints(playerIndex, isCorrect) {
     if (isCorrect) {
         players[playerIndex].score += points;
         currentTurn = playerIndex;
-        showFeedback(true);
     } else {
         players[playerIndex].score -= points;
-        showFeedback(false);
     }
     closeModal();
-}
-
-function showFeedback(isCorrect) {
-    feedbackOverlay.className = isCorrect ? 'correct' : 'incorrect';
-    setTimeout(() => { feedbackOverlay.className = ''; }, 500);
 }
 
 function closeModal() {
     modalOverlay.classList.remove('active');
     updateScoreboard();
-    if (document.querySelectorAll('.question-btn:not(.disabled)').length === 0) {
+    if (document.querySelectorAll('.question-panel:not(.disabled)').length === 0) {
         endGame();
     }
 }
 
 function endGame() {
-    const winner = players.reduce((prev, current) => (prev.score > current.score) ? prev : current);
-    turnIndicator.textContent = `Game Over! ${winner.name} wins with ${winner.score} points!`;
+    const highestScore = Math.max(...players.map(p => p.score));
+    const winners = players.filter(p => p.score === highestScore);
+
+    if (winners.length === 1) {
+        winnerAnnouncement.textContent = `SYSTEM VICTOR: ${winners[0].name}`;
+    } else {
+        winnerAnnouncement.textContent = `VICTORY SHARED: ${winners.map(w => w.name).join(' & ')}`;
+    }
+
+    finalScores.innerHTML = '';
+    const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+    sortedPlayers.forEach(player => {
+        const scoreItem = document.createElement('div');
+        scoreItem.className = 'final-score-item';
+        scoreItem.innerHTML = `${player.name}: <span>${player.score}</span>`;
+        finalScores.appendChild(scoreItem);
+    });
+    gameOverModal.classList.add('active');
 }
 
-// --- UTILITY & MISC EVENT LISTENERS ---
-scoreboardToggle.addEventListener('click', () => {
-    scoreboardContainer.classList.toggle('scoreboard-hidden');
+playAgainBtn.addEventListener('click', () => {
+    window.location.reload();
 });
-
-// A simple utility to adjust color brightness for the gradients
-function adjustColor(hex, percent) {
-    let r = parseInt(hex.slice(1, 3), 16),
-        g = parseInt(hex.slice(3, 5), 16),
-        b = parseInt(hex.slice(5, 7), 16);
-    r = parseInt(r * (100 + percent) / 100);
-    g = parseInt(g * (100 + percent) / 100);
-    b = parseInt(b * (100 + percent) / 100);
-    r = (r<255)?r:255;  g = (g<255)?g:255;  b = (b<255)?b:255;
-    return `#${("00"+r.toString(16)).slice(-2)}${("00"+g.toString(16)).slice(-2)}${("00"+b.toString(16)).slice(-2)}`;
-}
 
 // Initial Load
 loadCategories();

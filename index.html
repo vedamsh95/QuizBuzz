@@ -3,48 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Party</title>
+    <title>Quiz // ARCHITECT</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body class="dark-mode"> <div id="setup-screen" class="screen active">
+<body>
+
+    <div id="setup-screen" class="screen active">
         <div class="setup-container">
-            <h1 class="title-glow">Game Setup</h1>
+            <h1 class="main-title">// QUIZ SETUP</h1>
             <div class="setup-form">
                 <div class="setup-item">
-                    <label for="player-count">How many players?</label>
+                    <label>INITIATE PLAYERS [1-10]</label>
                     <input type="number" id="player-count" min="1" max="10" value="2">
                 </div>
                 <div id="player-names-container"></div>
                 <div class="setup-item">
-                    <h2>Choose 5 Categories:</h2>
+                    <label>SELECT 5 DATA MODULES [CATEGORIES]</label>
                     <div id="category-selection" class="category-card-grid">
                         </div>
                 </div>
-                <button id="start-game-btn" class="btn-start-game">
-                    <span>Start Game</span>
-                </button>
+                <button id="start-game-btn" class="btn-start-game">INITIALIZE SESSION</button>
             </div>
         </div>
     </div>
 
     <div id="game-screen" class="screen">
-        <main id="game-container">
-            <aside id="scoreboard-container" class="scoreboard-visible">
-                <div id="scoreboard-header">
-                    <h2>Scores</h2>
-                    <button id="scoreboard-toggle" title="Hide/Show Scores">👁️</button>
-                </div>
-                <div id="scoreboard-players">
-                    </div>
-            </aside>
-
+        <main id="game-area">
             <div id="game-board">
                 </div>
+            <div id="turn-indicator">
+                </div>
         </main>
-        <div id="turn-indicator"></div>
+        <aside id="scoreboard-area">
+            <h2 class="scoreboard-title">> SCORE_LOG</h2>
+            <div id="scoreboard-players">
+                </div>
+        </aside>
     </div>
 
     <div id="question-modal-overlay" class="modal-overlay">
@@ -52,18 +49,26 @@
             <div class="card-face card-front">
                 <p id="question-points"></p>
                 <h2 id="question-text"></h2>
-                <button id="reveal-answer-btn" class="btn">Reveal Answer</button>
+                <button id="reveal-answer-btn" class="btn">DECRYPT ANSWER</button>
             </div>
             <div class="card-face card-back">
-                <h2 id="answer-title">Answer:</h2>
+                <h2 id="answer-title">> ANSWER:</h2>
                 <p id="answer-text"></p>
                 <div id="scoring-controls">
-                    <h3>Award Points:</h3>
-                    <div id="player-scoring-container">
-                        </div>
-                    <button id="no-answer-btn" class="btn-secondary">Nobody Answered</button>
+                    <label>UPDATE SCORE:</label>
+                    <div id="player-scoring-container"></div>
+                    <button id="no-answer-btn" class="btn-secondary">NO RESPONSE / CONTINUE</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="game-over-modal" class="modal-overlay">
+        <div class="game-over-content">
+            <h1 class="main-title">// SESSION COMPLETE</h1>
+            <h2 id="winner-announcement"></h2>
+            <div id="final-scores"></div>
+            <button id="play-again-btn" class="btn-start-game">INITIATE NEW SESSION</button>
         </div>
     </div>
 

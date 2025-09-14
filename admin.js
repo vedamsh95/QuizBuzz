@@ -23,17 +23,16 @@ const logoutBtn = document.getElementById('logout-btn');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const loginError = document.getElementById('login-error');
-
 const categoryDashboard = document.getElementById('category-dashboard');
 const categoryNameInput = document.getElementById('category-name');
 const categoryColorInput = document.getElementById('category-color');
+const categoryDescInput = document.getElementById('category-desc');
 const addCategoryBtn = document.getElementById('add-category-btn');
-
-// Modal Elements
 const manageModal = document.getElementById('manage-category-modal');
 const modalCategoryTitle = document.getElementById('modal-category-title');
 const editCategoryName = document.getElementById('edit-category-name');
 const editCategoryColor = document.getElementById('edit-category-color');
+const editCategoryDesc = document.getElementById('edit-category-desc');
 const saveMetaBtn = document.getElementById('save-meta-btn');
 const deleteCategoryBtn = document.getElementById('delete-category-btn');
 const questionEditor = document.getElementById('question-editor');
@@ -55,7 +54,7 @@ auth.onAuthStateChanged(user => {
 });
 
 loginBtn.addEventListener('click', () => {
-    loginError.textContent = ''; // Clear previous errors
+    loginError.textContent = '';
     auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value)
         .catch(err => loginError.textContent = err.message);
 });
@@ -70,7 +69,7 @@ async function loadDashboard() {
         return;
     }
 
-    categoryDashboard.innerHTML = ''; // Clear loading message
+    categoryDashboard.innerHTML = '';
     snapshot.forEach(doc => {
         const category = { id: doc.id, ...doc.data() };
         const card = createCategoryCard(category);
@@ -81,10 +80,9 @@ async function loadDashboard() {
 function createCategoryCard(category) {
     const card = document.createElement('div');
     card.className = 'category-card';
-
     let completedCount = 0;
     const pointsBarHTML = DIFFICULTY_LEVELS.map(level => {
-        if (category.questions && category.questions[level]) {
+        if (category.questions && category.questions[level] && category.questions[level].length > 0) {
             completedCount++;
             return `<div class="point-indicator complete" title="${level} Points - Complete"></div>`;
         }
@@ -104,32 +102,30 @@ function createCategoryCard(category) {
             <button class="btn btn-manage">Manage</button>
         </div>
     `;
-
     card.querySelector('.btn-manage').addEventListener('click', () => openManageModal(category));
     return card;
 }
 
 addCategoryBtn.addEventListener('click', async () => {
-    const name = categoryName-nameInput.value.trim();
-    const color = category-colorInput.value.trim();
+    const name = categoryNameInput.value.trim();
+    const color = categoryColorInput.value.trim();
+    const description = categoryDescInput.value.trim();
     if (!name || !color) return alert('Name and color are required.');
 
-    await db.collection('categories').add({
-        name,
-        color,
-        questions: {} // Start with an empty questions map
-    });
+    await db.collection('categories').add({ name, color, description, questions: {} });
     categoryNameInput.value = '';
     categoryColorInput.value = '';
+    categoryDescInput.value = '';
     loadDashboard();
 });
 
 // --- MODAL LOGIC ---
 function openManageModal(category) {
-    currentCategory = category; // Keep track of the full category object
+    currentCategory = category;
     modalCategoryTitle.textContent = `Manage: ${category.name}`;
     editCategoryName.value = category.name;
     editCategoryColor.value = category.color;
+    editCategoryDesc.value = category.description || '';
 
     saveMetaBtn.onclick = () => saveCategoryMeta(category.id);
     deleteCategoryBtn.onclick = () => deleteCategory(category.id);
@@ -142,7 +138,6 @@ function buildQuestionEditor() {
     questionEditor.innerHTML = '';
     DIFFICULTY_LEVELS.forEach(level => {
         const questionsArray = currentCategory.questions && currentCategory.questions[level] ? currentCategory.questions[level] : [];
-        
         const section = document.createElement('div');
         section.className = 'difficulty-section';
 
@@ -157,7 +152,7 @@ function buildQuestionEditor() {
 
         section.innerHTML = `
             <h4>${level} Points (${questionsArray.length} question${questionsArray.length !== 1 ? 's' : ''})</h4>
-            <div class="existing-questions-list">${existingQuestionsHTML}</div>
+            <div class="existing-questions-list">${existingQuestionsHTML || '<p>No questions yet for this level.</p>'}</div>
             <div class="add-question-form">
                 <textarea placeholder="New Question Text"></textarea>
                 <textarea placeholder="New Answer"></textarea>
@@ -165,16 +160,16 @@ function buildQuestionEditor() {
             </div>
         `;
 
-        // Add event listeners for this section
         const addBtn = section.querySelector('.btn-add-question');
         addBtn.addEventListener('click', () => {
-            const text = addBtn.previousElementSibling.previousElementSibling.value.trim();
-            const answer = addBtn.previousElementSibling.value.trim();
-            addQuestion(level, text, answer);
+            const text = addBtn.previousElementSibling.previousElementSibling;
+            const answer = addBtn.previousElementSibling;
+            addQuestion(level, text.value.trim(), answer.value.trim());
+            text.value = '';
+            answer.value = '';
         });
 
-        const deleteBtns = section.querySelectorAll('.btn-delete-question');
-        deleteBtns.forEach(btn => {
+        section.querySelectorAll('.btn-delete-question').forEach(btn => {
             btn.addEventListener('click', () => {
                 const questionId = btn.closest('.existing-question-item').dataset.id;
                 deleteQuestion(level, questionId);
@@ -187,23 +182,33 @@ function buildQuestionEditor() {
 
 closeModalBtn.addEventListener('click', () => {
     manageModal.classList.remove('active');
-    loadDashboard(); 
+    loadDashboard();
 });
+
+async function saveCategoryMeta(id) {
+    const newName = editCategoryName.value.trim();
+    const newColor = editCategoryColor.value.trim();
+    const newDesc = editCategoryDesc.value.trim();
+    if (!newName || !newColor) return alert('Name and color are required.');
+
+    await db.collection('categories').doc(id).update({ name: newName, color: newColor, description: newDesc });
+    modalCategoryTitle.textContent = `Manage: ${newName}`;
+    alert('Category details updated!');
+}
+
+async function deleteCategory(id) {
+    if (!confirm('Are you sure you want to PERMANENTLY delete this entire category?')) return;
+    await db.collection('categories').doc(id).delete();
+    manageModal.classList.remove('active');
+    loadDashboard();
+}
 
 async function addQuestion(level, text, answer) {
     if (!text || !answer) return alert('Question and Answer cannot be empty.');
-
-    const newQuestion = {
-        id: Date.now().toString(), // Simple unique ID
-        text,
-        answer
-    };
-
+    const newQuestion = { id: Date.now().toString(), text, answer };
     await db.collection('categories').doc(currentCategory.id).update({
         [`questions.${level}`]: firebase.firestore.FieldValue.arrayUnion(newQuestion)
     });
-    
-    // Refresh modal view
     const doc = await db.collection('categories').doc(currentCategory.id).get();
     currentCategory = { id: doc.id, ...doc.data() };
     buildQuestionEditor();
@@ -211,51 +216,13 @@ async function addQuestion(level, text, answer) {
 
 async function deleteQuestion(level, questionId) {
     if (!confirm('Are you sure you want to delete this question?')) return;
-    
     const questionToDelete = currentCategory.questions[level].find(q => q.id === questionId);
-    
     if (questionToDelete) {
         await db.collection('categories').doc(currentCategory.id).update({
             [`questions.${level}`]: firebase.firestore.FieldValue.arrayRemove(questionToDelete)
         });
-
-        // Refresh modal view
         const doc = await db.collection('categories').doc(currentCategory.id).get();
         currentCategory = { id: doc.id, ...doc.data() };
         buildQuestionEditor();
-    }
-}
-async function saveCategoryMeta(id) {
-    const newName = editCategoryName.value.trim();
-    const newColor = editCategoryColor.value.trim();
-    if (!newName || !newColor) return alert('Name and color are required.');
-
-    await db.collection('categories').doc(id).update({ name: newName, color: newColor });
-    modalCategoryTitle.textContent = `Manage: ${newName}`;
-    alert('Category details updated!');
-}
-
-async function deleteCategory(id) {
-    if (!confirm('Are you sure you want to PERMANENTLY delete this entire category and all its questions?')) return;
-    
-    await db.collection('categories').doc(id).delete();
-    manageModal.classList.remove('active');
-    loadDashboard();
-}
-
-async function saveQuestion(categoryId, level, text, answer) {
-    if (!text || !answer) {
-        if (confirm(`This will clear the question and answer for ${level} points. Are you sure?`)) {
-             await db.collection('categories').doc(categoryId).update({
-                [`questions.${level}`]: firebase.firestore.FieldValue.delete()
-            });
-            alert(`Question for ${level} points cleared.`);
-        }
-    } else {
-        // Use dot notation to update a specific field in the map
-        await db.collection('categories').doc(categoryId).update({
-            [`questions.${level}`]: { text, answer }
-        });
-        alert(`Question for ${level} points saved!`);
     }
 }
