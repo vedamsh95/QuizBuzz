@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuizParty</title>
+    <title>Quiz // ARCHITECT</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,19 +16,36 @@
             <h1 class="main-title">// QUIZ SETUP</h1>
             <div class="setup-layout">
                 <div class="setup-main">
-                    <div class="setup-item">
-                        <label>INITIATE PLAYERS [1-10]</label>
-                        <input type="number" id="player-count" min="1" max="10" value="2">
-                        <div id="player-names-container"></div>
+                    <div class="setup-grid">
+                        <div class="setup-item">
+                            <label>GAME MODE</label>
+                            <div class="game-mode-selector">
+                                <input type="radio" id="mode-classic" name="game-mode" value="classic" checked><label for="mode-classic">Classic Arena</label>
+                                <input type="radio" id="mode-mystery" name="game-mode" value="mystery"><label for="mode-mystery">Mystery Arena</label>
+                            </div>
+                        </div>
+                        <div class="setup-item">
+                            <label>ROUNDS [1-5]</label>
+                            <input type="number" id="round-count" min="1" max="5" value="1">
+                        </div>
+                        <div class="setup-item">
+                            <label>CATEGORIES / ROUND [1-5]</label>
+                            <input type="number" id="cat-per-round-count" min="1" max="5" value="5">
+                        </div>
+                        <div class="setup-item">
+                            <label>PLAYERS [1-10]</label>
+                            <input type="number" id="player-count" min="1" max="10" value="2">
+                        </div>
                     </div>
+                    <div id="player-names-container"></div>
                     <div class="setup-item">
                         <div id="main-category-view">
-                            <label>SELECT DATA MODULE [MAIN CATEGORY]</label>
+                            <label>SELECT MAIN CATEGORY</label>
                             <div id="main-category-selection" class="main-category-grid"></div>
                         </div>
                         <div id="sub-category-view" class="hidden">
-                            <button id="back-to-main-btn" class="btn btn-secondary">&lt; Back to Main Categories</button>
-                            <label>SELECT 5 SUB-MODULES</label>
+                            <button id="back-to-main-btn" class="btn btn-secondary">&lt; Back</button>
+                            <label id="sub-category-label">SELECT 5 SUB-MODULES</label>
                             <div id="category-selection" class="category-card-grid"></div>
                         </div>
                     </div>
@@ -36,7 +53,7 @@
                 <aside class="setup-sidebar">
                     <label>MODULES SELECTED</label>
                     <div id="selections-container">
-                        <p class="selections-placeholder">Select up to 5 sub-modules.</p>
+                        <p class="selections-placeholder">Select your sub-modules.</p>
                     </div>
                 </aside>
             </div>
@@ -46,6 +63,7 @@
 
     <div id="game-screen" class="screen">
         <main id="game-area">
+            <h2 id="round-title"></h2>
             <div id="game-board"></div>
             <div id="turn-indicator"></div>
         </main>
@@ -64,13 +82,14 @@
             <div class="card-face card-back">
                 <h2 id="answer-title">> ANSWER:</h2><p id="answer-text"></p>
                 <div id="scoring-controls">
-                    <label>UPDATE SCORE:</label>
+                    <label>AWARD POINTS FOR THIS QUESTION</label>
                     <div id="player-scoring-container"></div>
-                    <button id="no-answer-btn" class="btn-secondary">NO RESPONSE / CONTINUE</button>
+                    <button id="submit-scores-btn" class="btn">Submit Scores & Continue</button>
                 </div>
             </div>
         </div>
     </div>
+
     <div id="game-over-modal" class="modal-overlay">
         <div class="game-over-content">
             <h1 class="main-title">// SESSION COMPLETE</h1>
