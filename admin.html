@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Admin Dashboard</title>
+    <title>Quiz Admin</title>
     <link rel="stylesheet" href="admin.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="login-screen" class="screen active">
+    <div id="login-screen" class="screen">
         <div class="login-container">
             <h1>Admin Login</h1>
             <input type="email" id="email" placeholder="Email">
@@ -20,19 +20,32 @@
         </div>
     </div>
 
-    <div id="dashboard-screen" class="screen">
+    <div id="dashboard-screen" class="screen hidden">
         <header class="dashboard-header">
             <h1>Admin Dashboard</h1>
             <button id="logout-btn" class="btn btn-secondary">Logout</button>
         </header>
+
         <main class="dashboard-main">
+            <div class="dashboard-section">
+                <h2>Bulk Import</h2>
+                <p>Upload a JSON file with quiz data to add multiple categories and questions at once.</p>
+                <input type="file" id="json-upload" accept=".json">
+                <button id="import-btn" class="btn">Import Data</button>
+                <pre id="import-status"></pre>
+            </div>
+
             <div id="category-dashboard"></div>
-            <div class="add-category-form">
-                <h2>Add New Category</h2>
-                <input type="text" id="category-name" placeholder="Category Name">
-                <input type="text" id="category-color" placeholder="e.g., #ff5733 or crimson">
-                <textarea id="category-desc" placeholder="Category Description"></textarea>
-                <button id="add-category-btn" class="btn">Create Category</button>
+            
+            <div class="dashboard-section">
+                <h2>Add New Sub-Category</h2>
+                <div class="add-category-form">
+                    <input type="text" id="sub-category-name" placeholder="Sub-Category Name">
+                    <input type="text" id="sub-category-color" placeholder="Color (e.g., #ff5733)">
+                    <textarea id="sub-category-desc" placeholder="Sub-Category Description"></textarea>
+                    <input type="text" id="main-category-name" placeholder="Main Category (e.g., Geography)">
+                    <button id="add-category-btn" class="btn">Create Sub-Category</button>
+                </div>
             </div>
         </main>
     </div>
@@ -42,22 +55,23 @@
             <h2 id="modal-category-title">Manage Category</h2>
             <div class="modal-body">
                 <div class="category-meta-editor">
-                    <h3>Category Details</h3>
-                    <input type="text" id="edit-category-name" placeholder="Category Name">
-                    <input type="text" id="edit-category-color" placeholder="Category Color">
-                    <textarea id="edit-category-desc" placeholder="Category Description"></textarea>
+                    <h3>Sub-Category Details</h3>
+                    <input type="text" id="edit-sub-category-name" placeholder="Sub-Category Name">
+                    <input type="text" id="edit-sub-category-color" placeholder="Color">
+                    <textarea id="edit-sub-category-desc" placeholder="Description"></textarea>
+                    <input type="text" id="edit-main-category-name" placeholder="Main Category">
                     <button id="save-meta-btn" class="btn">Save Details</button>
-                    <button id="delete-category-btn" class="btn btn-danger">Delete This Category</button>
+                    <button id="delete-category-btn" class="btn btn-danger">Delete This Sub-Category</button>
                 </div>
-                <div id="question-editor" class="question-editor-grid">
-                    </div>
+                <div id="question-editor" class="question-editor-grid"></div>
             </div>
             <button id="close-modal-btn" class="btn-close-modal">×</button>
         </div>
     </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="admin.js"></script>
 </body>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-<script src="admin.js"></script>
 </html>

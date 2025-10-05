@@ -1,57 +1,44 @@
-/* --- 1. Core Aesthetics & Atmosphere --- */
 :root {
     --bg-gradient: linear-gradient(160deg, #000000 0%, #002B22 100%);
     --font-primary: 'Roboto Mono', monospace;
     --color-neon-cyan: #00FFFF;
     --color-text-primary: #FFFFFF;
-    --glass-bg: rgba(10, 25, 40, 0.5); /* Darker glass for better contrast */
+    --glass-bg: rgba(10, 25, 40, 0.5);
     --glass-border: rgba(0, 255, 255, 0.2);
     --glow-shadow: 0 0 5px var(--color-neon-cyan), 0 0 10px var(--color-neon-cyan);
-
-    /* HSL values for 5 distinct category colors. */
-    --cat-1-hue: 180; /* Cyan */
-    --cat-2-hue: 285; /* Magenta/Purple */
-    --cat-3-hue: 50;  /* Yellow/Gold */
-    --cat-4-hue: 130; /* Green */
-    --cat-5-hue: 20;  /* Orange */
+    --cat-1-hue: 180; --cat-2-hue: 285; --cat-3-hue: 50; --cat-4-hue: 130; --cat-5-hue: 20;
 }
-
-body {
-    font-family: var(--font-primary);
-    margin: 0;
-    background: var(--bg-gradient);
-    background-attachment: fixed;
-    color: var(--color-text-primary);
-    overflow: hidden;
-}
-
+body { font-family: var(--font-primary); margin: 0; background: var(--bg-gradient); background-attachment: fixed; color: var(--color-text-primary); overflow: hidden; }
 .screen { display: none; width: 100vw; height: 100vh; }
 .screen.active { display: flex; }
+.hidden { display: none !important; }
 
-/* --- 2. Screen 1: Game Setup --- */
 #setup-screen { align-items: center; justify-content: center; }
-.setup-container {
-    width: 90%; max-width: 1000px; padding: 40px;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(10px);
-    border-radius: 8px;
-}
+.setup-container { width: 90%; max-width: 1200px; padding: 40px; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(10px); border-radius: 8px; }
 .main-title { font-size: 2.5rem; font-weight: 700; color: var(--color-neon-cyan); text-shadow: var(--glow-shadow); text-align: center; letter-spacing: 2px; }
-label { font-weight: 700; color: var(--color-neon-cyan); letter-spacing: 1px; }
-input[type="number"], input[type="text"] { background: transparent; border: 1px solid var(--glass-border); color: var(--color-text-primary); padding: 12px; border-radius: 4px; width: 100%; box-sizing: border-box; font-family: var(--font-primary); }
-.btn-start-game { width: 100%; padding: 15px; font-size: 1.2rem; font-weight: 700; color: var(--color-neon-cyan); background-color: var(--glass-bg); border: 1px solid var(--color-neon-cyan); border-radius: 4px; cursor: pointer; text-shadow: 0 0 5px var(--color-neon-cyan); transition: all 0.2s ease; }
+label { font-weight: 700; color: var(--color-neon-cyan); letter-spacing: 1px; display: block; margin-bottom: 10px; }
+input { background: transparent; border: 1px solid var(--glass-border); color: var(--color-text-primary); padding: 12px; border-radius: 4px; width: 100%; box-sizing: border-box; font-family: var(--font-primary); }
+.btn-start-game { width: 100%; padding: 15px; font-size: 1.2rem; font-weight: 700; color: var(--color-neon-cyan); background-color: var(--glass-bg); border: 1px solid var(--color-neon-cyan); border-radius: 4px; cursor: pointer; text-shadow: 0 0 5px var(--color-neon-cyan); transition: all 0.2s ease; margin-top: 20px; }
 .btn-start-game:hover { background-color: var(--color-neon-cyan); color: #000; box-shadow: var(--glow-shadow); }
 .setup-item { margin-bottom: 25px; }
 #player-names-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.category-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; max-height: 250px; overflow-y: auto; padding: 10px; }
+.setup-layout { display: flex; gap: 30px; }
+.setup-main { flex: 2; }
+.setup-sidebar { flex: 1; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; border: 1px solid var(--glass-border); }
+#selections-container .selections-placeholder { color: rgba(255,255,255,0.5); font-style: italic; }
+.selection-item { display: flex; justify-content: space-between; align-items: center; background-color: var(--color-neon-cyan); color: #000; padding: 8px 12px; border-radius: 4px; margin-bottom: 10px; font-weight: 700; }
+.selection-item .remove-btn { background: none; border: none; color: #000; font-weight: 700; font-size: 1.2rem; cursor: pointer; padding: 0 5px; }
+.main-category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+.main-category-btn { padding: 25px; font-size: 1.2rem; font-weight: 700; width: 100%; margin: 0; }
+#back-to-main-btn { margin-bottom: 15px; width: auto; padding: 8px 15px; border-color: rgba(255,255,255,0.5); color: rgba(255,255,255,0.5); }
+#back-to-main-btn:hover { background-color: rgba(255,255,255,0.5); color: #000; }
+.category-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; max-height: 250px; overflow-y: auto; padding: 5px; }
 .category-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 4px; padding: 15px; cursor: pointer; transition: all 0.2s ease; }
 .category-card input { display: none; }
 .category-card:hover, .category-card.selected { border-color: var(--color-neon-cyan); box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.3); }
 .category-card h3 { margin: 0 0 8px 0; color: var(--color-neon-cyan); }
 .category-card p { margin: 0; font-size: 0.8rem; color: rgba(255,255,255,0.7); }
 
-/* --- 3. Screen 2: Game Screen Layout --- */
 #game-screen { flex-direction: row; padding: 30px; box-sizing: border-box; }
 #game-area { flex: 3; padding-right: 30px; display: flex; flex-direction: column; height: 100%; }
 #scoreboard-area { flex: 1; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(10px); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
@@ -69,34 +56,12 @@ input[type="number"], input[type="text"] { background: transparent; border: 1px 
 .question-panel.disabled { background: rgba(0,0,0,0.5) !important; border: 1px dashed var(--glass-border); color: rgba(255,255,255,0.2); cursor: not-allowed; }
 #turn-indicator { padding-top: 20px; text-align: center; font-size: 1.2rem; }
 
-/* --- 4. Dynamic Category & Difficulty Coloring --- */
-.category-1 .question-panel { background-color: hsl(var(--cat-1-hue), 70%, 50%); }
-.category-1 .question-panel:nth-of-type(2) { background-color: hsl(var(--cat-1-hue), 70%, 45%); }
-.category-1 .question-panel:nth-of-type(3) { background-color: hsl(var(--cat-1-hue), 70%, 40%); }
-.category-1 .question-panel:nth-of-type(4) { background-color: hsl(var(--cat-1-hue), 70%, 35%); }
-.category-1 .question-panel:nth-of-type(5) { background-color: hsl(var(--cat-1-hue), 70%, 30%); }
-.category-2 .question-panel { background-color: hsl(var(--cat-2-hue), 70%, 60%); }
-.category-2 .question-panel:nth-of-type(2) { background-color: hsl(var(--cat-2-hue), 70%, 55%); }
-.category-2 .question-panel:nth-of-type(3) { background-color: hsl(var(--cat-2-hue), 70%, 50%); }
-.category-2 .question-panel:nth-of-type(4) { background-color: hsl(var(--cat-2-hue), 70%, 45%); }
-.category-2 .question-panel:nth-of-type(5) { background-color: hsl(var(--cat-2-hue), 70%, 40%); }
-.category-3 .question-panel { background-color: hsl(var(--cat-3-hue), 80%, 60%); }
-.category-3 .question-panel:nth-of-type(2) { background-color: hsl(var(--cat-3-hue), 80%, 55%); }
-.category-3 .question-panel:nth-of-type(3) { background-color: hsl(var(--cat-3-hue), 80%, 50%); }
-.category-3 .question-panel:nth-of-type(4) { background-color: hsl(var(--cat-3-hue), 80%, 45%); }
-.category-3 .question-panel:nth-of-type(5) { background-color: hsl(var(--cat-3-hue), 80%, 40%); }
-.category-4 .question-panel { background-color: hsl(var(--cat-4-hue), 70%, 55%); }
-.category-4 .question-panel:nth-of-type(2) { background-color: hsl(var(--cat-4-hue), 70%, 50%); }
-.category-4 .question-panel:nth-of-type(3) { background-color: hsl(var(--cat-4-hue), 70%, 45%); }
-.category-4 .question-panel:nth-of-type(4) { background-color: hsl(var(--cat-4-hue), 70%, 40%); }
-.category-4 .question-panel:nth-of-type(5) { background-color: hsl(var(--cat-4-hue), 70%, 35%); }
-.category-5 .question-panel { background-color: hsl(var(--cat-5-hue), 80%, 65%); }
-.category-5 .question-panel:nth-of-type(2) { background-color: hsl(var(--cat-5-hue), 80%, 60%); }
-.category-5 .question-panel:nth-of-type(3) { background-color: hsl(var(--cat-5-hue), 80%, 55%); }
-.category-5 .question-panel:nth-of-type(4) { background-color: hsl(var(--cat-5-hue), 80%, 50%); }
-.category-5 .question-panel:nth-of-type(5) { background-color: hsl(var(--cat-5-hue), 80%, 45%); }
+.category-1 .question-panel { background-color: hsl(var(--cat-1-hue), 70%, 50%); } .category-1 .question-panel:nth-of-type(2) { background-color: hsl(var(--cat-1-hue), 70%, 45%); } .category-1 .question-panel:nth-of-type(3) { background-color: hsl(var(--cat-1-hue), 70%, 40%); } .category-1 .question-panel:nth-of-type(4) { background-color: hsl(var(--cat-1-hue), 70%, 35%); } .category-1 .question-panel:nth-of-type(5) { background-color: hsl(var(--cat-1-hue), 70%, 30%); }
+.category-2 .question-panel { background-color: hsl(var(--cat-2-hue), 70%, 60%); } .category-2 .question-panel:nth-of-type(2) { background-color: hsl(var(--cat-2-hue), 70%, 55%); } .category-2 .question-panel:nth-of-type(3) { background-color: hsl(var(--cat-2-hue), 70%, 50%); } .category-2 .question-panel:nth-of-type(4) { background-color: hsl(var(--cat-2-hue), 70%, 45%); } .category-2 .question-panel:nth-of-type(5) { background-color: hsl(var(--cat-2-hue), 70%, 40%); }
+.category-3 .question-panel { background-color: hsl(var(--cat-3-hue), 80%, 60%); } .category-3 .question-panel:nth-of-type(2) { background-color: hsl(var(--cat-3-hue), 80%, 55%); } .category-3 .question-panel:nth-of-type(3) { background-color: hsl(var(--cat-3-hue), 80%, 50%); } .category-3 .question-panel:nth-of-type(4) { background-color: hsl(var(--cat-3-hue), 80%, 45%); } .category-3 .question-panel:nth-of-type(5) { background-color: hsl(var(--cat-3-hue), 80%, 40%); }
+.category-4 .question-panel { background-color: hsl(var(--cat-4-hue), 70%, 55%); } .category-4 .question-panel:nth-of-type(2) { background-color: hsl(var(--cat-4-hue), 70%, 50%); } .category-4 .question-panel:nth-of-type(3) { background-color: hsl(var(--cat-4-hue), 70%, 45%); } .category-4 .question-panel:nth-of-type(4) { background-color: hsl(var(--cat-4-hue), 70%, 40%); } .category-4 .question-panel:nth-of-type(5) { background-color: hsl(var(--cat-4-hue), 70%, 35%); }
+.category-5 .question-panel { background-color: hsl(var(--cat-5-hue), 80%, 65%); } .category-5 .question-panel:nth-of-type(2) { background-color: hsl(var(--cat-5-hue), 80%, 60%); } .category-5 .question-panel:nth-of-type(3) { background-color: hsl(var(--cat-5-hue), 80%, 55%); } .category-5 .question-panel:nth-of-type(4) { background-color: hsl(var(--cat-5-hue), 80%, 50%); } .category-5 .question-panel:nth-of-type(5) { background-color: hsl(var(--cat-5-hue), 80%, 45%); }
 
-/* --- 5. Modals and Overlays --- */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; perspective: 1000px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 1000; }
 .modal-overlay.active { display: flex; opacity: 1; pointer-events: auto; }
 #question-card { width: 90%; max-width: 900px; min-height: 400px; position: relative; transform-style: preserve-3d; transition: transform 0.6s; }
