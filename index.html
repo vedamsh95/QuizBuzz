@@ -13,48 +13,25 @@
 
     <div id="setup-screen" class="screen active">
         <div class="setup-container">
+            <button id="show-rules-btn" class="btn-rules">📜 RULES</button>
             <h1 class="main-title">// QUIZ SETUP</h1>
             <div class="setup-layout">
                 <div class="setup-main">
                     <div class="setup-grid">
-                        <div class="setup-item">
-                            <label>GAME MODE</label>
-                            <div class="game-mode-selector">
-                                <input type="radio" id="mode-classic" name="game-mode" value="classic" checked><label for="mode-classic">Classic Arena</label>
-                                <input type="radio" id="mode-mystery" name="game-mode" value="mystery"><label for="mode-mystery">Mystery Arena</label>
-                            </div>
-                        </div>
-                        <div class="setup-item">
-                            <label>ROUNDS [1-5]</label>
-                            <input type="number" id="round-count" min="1" max="5" value="1">
-                        </div>
-                        <div class="setup-item">
-                            <label>CATEGORIES / ROUND [1-5]</label>
-                            <input type="number" id="cat-per-round-count" min="1" max="5" value="5">
-                        </div>
-                        <div class="setup-item">
-                            <label>PLAYERS [1-10]</label>
-                            <input type="number" id="player-count" min="1" max="10" value="2">
-                        </div>
+                        <div class="setup-item"><label>GAME MODE</label><div class="game-mode-selector"><input type="radio" id="mode-classic" name="game-mode" value="classic" checked><label for="mode-classic">Classic</label><input type="radio" id="mode-mystery" name="game-mode" value="mystery"><label for="mode-mystery">Mystery</label></div></div>
+                        <div class="setup-item"><label>ROUNDS [1-5]</label><input type="number" id="round-count" min="1" max="5" value="1"></div>
+                        <div class="setup-item"><label>CATEGORIES / ROUND [1-5]</label><input type="number" id="cat-per-round-count" min="1" max="5" value="5"></div>
+                        <div class="setup-item"><label>PLAYERS [1-10]</label><input type="number" id="player-count" min="1" max="10" value="2"></div>
                     </div>
                     <div id="player-names-container"></div>
                     <div class="setup-item">
-                        <div id="main-category-view">
-                            <label>SELECT MAIN CATEGORY</label>
-                            <div id="main-category-selection" class="main-category-grid"></div>
-                        </div>
-                        <div id="sub-category-view" class="hidden">
-                            <button id="back-to-main-btn" class="btn btn-secondary">&lt; Back</button>
-                            <label id="sub-category-label">SELECT 5 SUB-MODULES</label>
-                            <div id="category-selection" class="category-card-grid"></div>
-                        </div>
+                        <div id="main-category-view"><label>SELECT MAIN CATEGORY</label><div id="main-category-selection" class="main-category-grid"></div></div>
+                        <div id="sub-category-view" class="hidden"><button id="back-to-main-btn" class="btn btn-secondary">&lt; Back</button><label id="sub-category-label">SELECT 5 SUB-MODULES</label><div id="category-selection" class="category-card-grid"></div></div>
                     </div>
                 </div>
                 <aside class="setup-sidebar">
                     <label>MODULES SELECTED</label>
-                    <div id="selections-container">
-                        <p class="selections-placeholder">Select your sub-modules.</p>
-                    </div>
+                    <div id="selections-container"><p class="selections-placeholder">Select your sub-modules.</p></div>
                 </aside>
             </div>
             <button id="start-game-btn" class="btn-start-game">INITIALIZE SESSION</button>
@@ -62,46 +39,32 @@
     </div>
 
     <div id="game-screen" class="screen">
-        <main id="game-area">
-            <h2 id="round-title"></h2>
-            <div id="game-board"></div>
-            <div id="turn-indicator"></div>
-        </main>
-        <aside id="scoreboard-area">
-            <h2 class="scoreboard-title">> SCORE_LOG</h2>
-            <div id="scoreboard-players"></div>
-        </aside>
+        <main id="game-area"><h2 id="round-title"></h2><div id="game-board"></div><div id="turn-indicator"></div></main>
+        <aside id="scoreboard-area"><h2 class="scoreboard-title">> SCORE_LOG</h2><div id="scoreboard-players"></div></aside>
     </div>
 
     <div id="question-modal-overlay" class="modal-overlay">
         <div id="question-card">
-            <div class="card-face card-front">
-                <p id="question-points"></p><h2 id="question-text"></h2>
-                <button id="reveal-answer-btn" class="btn">DECRYPT ANSWER</button>
-            </div>
-            <div class="card-face card-back">
-                <h2 id="answer-title">> ANSWER:</h2><p id="answer-text"></p>
-                <div id="scoring-controls">
-                    <label>AWARD POINTS FOR THIS QUESTION</label>
-                    <div id="player-scoring-container"></div>
-                    <button id="submit-scores-btn" class="btn">Submit Scores & Continue</button>
-                </div>
-            </div>
+            <div class="card-face card-front"><p id="question-points"></p><h2 id="question-text"></h2><button id="reveal-answer-btn" class="btn">DECRYPT ANSWER</button></div>
+            <div class="card-face card-back"><h2 id="answer-title">> ANSWER:</h2><p id="answer-text"></p><div id="scoring-controls"><label>AWARD POINTS</label><div id="player-scoring-container"></div><button id="submit-scores-btn" class="btn">Submit Scores & Continue</button></div></div>
         </div>
     </div>
-
     <div id="game-over-modal" class="modal-overlay">
-        <div class="game-over-content">
-            <h1 class="main-title">// SESSION COMPLETE</h1>
-            <h2 id="winner-announcement"></h2>
-            <div id="final-scores"></div>
-            <button id="play-again-btn" class="btn-start-game">INITIATE NEW SESSION</button>
+        <div class="modal-content game-over-content"><h1 class="main-title">// SESSION COMPLETE</h1><h2 id="winner-announcement"></h2><div id="final-scores"></div><button id="play-again-btn" class="btn-start-game">INITIATE NEW SESSION</button></div>
+    </div>
+    <div id="rules-modal" class="modal-overlay">
+        <div class="modal-content rules-content">
+            <button id="close-rules-btn" class="btn-close-modal">×</button>
+            <h2 class="main-title">// RULES & GAMEPLAY</h2>
+            <div class="rules-section"><h3>A General Note</h3><p>The best way to play is <em>your</em> way! If you need a starting point, here are our official suggestions.</p></div>
+            <div class="rules-section"><h3>Game Setup & Scoring</h3><ul><li><strong>Setup:</strong> Choose your Game Mode, Rounds, and Categories per round. Then, enter player names.</li><li><strong>The Board:</strong> Each round presents a grid of categories with five questions each.</li><li><strong>Scoring:</strong> Correct answers earn points (+200), but incorrect answers lose points (-200).</li><li><strong>Starting Player:</strong> The game randomly selects the first player to choose a question.</li></ul></div>
+            <div class="rules-section"><h3>Classic Arena Mode</h3><h4>Variation 1: Buzzer Showdown</h4><ul><li>The active player chooses a question. After it's read, any player can "buzz in."</li><li>A player may choose not to buzz. If you don't buzz, you risk no points.</li><li>The first player to buzz answers. If incorrect, the next player who buzzed gets a chance.</li><li><strong>Host:</strong> Only click "Show Answer" after all buzzed-in players have given their answers.</li><li>The first player to answer correctly wins the points and control of the board.</li></ul><h4>Variation 2: Turn-Based Party</h4><ul><li>The active player chooses a question.</li><li>Every player, in turn order, gets a chance to either give an answer or <strong>pass</strong>. Passing means you do not gain or lose points.</li><li><strong>Host:</strong> After everyone has had a chance to answer or pass, click "Show Answer" and score each player.</li><li>Control of the board passes to the next player in the turn order.</li></ul></div>
+            <div class="rules-section"><h3>Mystery Arena Mode</h3><p>All point values are hidden (`?`) and randomized. Gameplay follows a Classic Arena variation, or this exclusive one:</p><h4>Suggested Variation: Pass or Play</h4><ul><li>The active player chooses a mystery panel.</li><li><strong>Before the question is revealed</strong>, they must decide: **"Play"** it themselves or **"Pass"** it to the next player.</li><li>If they **Play**, only they can answer. If correct, they keep control.</li><li>If they **Pass**, only the next player can answer. If that player is correct, *they* gain control.</li><li>If the answering player is incorrect, control passes to the next person in the original turn order.</li></ul></div>
         </div>
     </div>
-
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="app.js"></script>
-
 </body>
 </html>

@@ -1,5 +1,5 @@
 // --- PASTE YOUR FIREBASE CONFIGURATION OBJECT HERE ---
-const firebaseConfig = {
+const firebaseConfig = { 
     apiKey: "AIzaSyAsqOjRi548qQeZXZ9SQ7utkv_UoGIp56g",
     authDomain: "quizbuzz-472118.firebaseapp.com",
     projectId: "quizbuzz-472118",
@@ -13,7 +13,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// This wrapper ensures the HTML is loaded before any script runs.
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- DOM Elements ---
@@ -47,6 +46,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const winnerAnnouncement = document.getElementById('winner-announcement');
     const finalScores = document.getElementById('final-scores');
     const playAgainBtn = document.getElementById('play-again-btn');
+    const showRulesBtn = document.getElementById('show-rules-btn');
+    const rulesModal = document.getElementById('rules-modal');
+    const closeRulesBtn = document.getElementById('close-rules-btn');
 
     // --- Game State & Settings ---
     let players = [], allCategories = [], selectedCategories = [], gameRounds = [];
@@ -69,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const mainCategories = [...new Set(allCategories.map(cat => cat.mainCategory).filter(Boolean))];
             mainCategorySelection.innerHTML = '';
             if (mainCategories.length === 0) {
-                mainCategorySelection.innerHTML = '<p>No categories found in database.</p>';
+                mainCategorySelection.innerHTML = '<p>No categories found. Please add some in the admin panel.</p>';
                 return;
             }
             mainCategories.forEach(mainCat => {
@@ -81,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } catch (error) {
             console.error("Error loading categories:", error);
-            mainCategorySelection.innerHTML = '<p style="color:red;">Could not load categories. Check connection/rules.</p>';
+            mainCategorySelection.innerHTML = '<p style="color:red;">Could not load categories. Check Firestore connection and security rules.</p>';
         }
     }
 
@@ -290,20 +292,15 @@ document.addEventListener('DOMContentLoaded', () => {
     playerCountInput.addEventListener('change', createPlayerInputs);
     roundCountInput.addEventListener('change', updateCategorySelectionCount);
     catPerRoundInput.addEventListener('change', updateCategorySelectionCount);
-    document.querySelectorAll('input[name="game-mode"]').forEach(radio => {
-        radio.addEventListener('change', (e) => gameMode = e.target.value);
-    });
-    backToMainBtn.addEventListener('click', () => {
-        subCategoryView.classList.add('hidden');
-        mainCategoryView.classList.remove('hidden');
-    });
+    document.querySelectorAll('input[name="game-mode"]').forEach(radio => { radio.addEventListener('change', (e) => gameMode = e.target.value); });
+    backToMainBtn.addEventListener('click', () => { subCategoryView.classList.add('hidden'); mainCategoryView.classList.remove('hidden'); });
     startGameBtn.addEventListener('click', handleStartGame);
-    revealAnswerBtn.addEventListener('click', () => {
-        questionCard.classList.add('is-flipped');
-        buildScoringControls();
-    });
+    revealAnswerBtn.addEventListener('click', () => { questionCard.classList.add('is-flipped'); buildScoringControls(); });
     submitScoresBtn.addEventListener('click', handleSubmitScores);
     playAgainBtn.addEventListener('click', () => window.location.reload());
+    showRulesBtn.addEventListener('click', () => rulesModal.classList.add('active'));
+    closeRulesBtn.addEventListener('click', () => rulesModal.classList.remove('active'));
+    rulesModal.addEventListener('click', (e) => { if (e.target === rulesModal) rulesModal.classList.remove('active'); });
 
     // Initial function calls
     createPlayerInputs();
