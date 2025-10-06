@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
 </head>
 <body>
+
     <div id="login-screen" class="screen">
         <div class="login-container">
             <h1>Admin Login</h1>
@@ -30,12 +31,16 @@
             <div class="dashboard-section">
                 <h2>Bulk Import</h2>
                 <p>Upload a JSON file with quiz data to add multiple categories and questions at once.</p>
+                <button id="show-syntax-btn" class="btn btn-secondary">Show Syntax Example</button>
+                <br><br>
                 <input type="file" id="json-upload" accept=".json">
                 <button id="import-btn" class="btn">Import Data</button>
                 <pre id="import-status"></pre>
             </div>
 
-            <div id="category-dashboard"></div>
+            <div id="category-dashboard" class="dashboard-section">
+                <h2>Existing Categories</h2>
+                </div>
             
             <div class="dashboard-section">
                 <h2>Add New Sub-Category</h2>
@@ -52,6 +57,7 @@
 
     <div id="manage-category-modal" class="modal-overlay">
         <div class="modal-content">
+            <button id="close-modal-btn" class="btn-close-modal">×</button>
             <h2 id="modal-category-title">Manage Category</h2>
             <div class="modal-body">
                 <div class="category-meta-editor">
@@ -65,7 +71,64 @@
                 </div>
                 <div id="question-editor" class="question-editor-grid"></div>
             </div>
-            <button id="close-modal-btn" class="btn-close-modal">×</button>
+        </div>
+    </div>
+
+    <div id="syntax-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="close-syntax-btn" class="btn-close-modal">×</button>
+            <h2>JSON Import Syntax</h2>
+            <p>Your JSON file must be an array `[]` of category objects `{}`. Use this format:</p>
+            <div class="code-block-container">
+                <button id="copy-syntax-btn" class="btn-copy">Copy</button>
+                <pre><code id="syntax-example">
+[
+  {
+    "mainCategory": "Food & Drink",
+    "subCategoryName": "Signature Fast Food",
+    "subCategoryColor": "#bd10e0",
+    "subCategoryDescription": "Match the signature product to its fast food chain.",
+    "questions": {
+      "100": [
+        { "text": "Big Mac", "answer": "McDonald's" },
+        { "text": "Whopper", "answer": "Burger King" },
+        { "text": "Original Recipe Chicken", "answer": "KFC" },
+        { "text": "Footlong", "answer": "Subway" },
+        { "text": "Frappuccino", "answer": "Starbucks" }
+      ],
+      "200": [
+        { "text": "Crunchwrap Supreme", "answer": "Taco Bell" },
+        { "text": "Frosty", "answer": "Wendy's" },
+        { "text": "Blizzard", "answer": "Dairy Queen" },
+        { "text": "Baconator", "answer": "Wendy's" },
+        { "text": "McNuggets", "answer": "McDonald's" }
+      ],
+      "300": [
+        { "text": "Stuffed Crust Pizza", "answer": "Pizza Hut" },
+        { "text": "Curly Fries", "answer": "Arby's" },
+        { "text": "McFlurry", "answer": "McDonald's" },
+        { "text": "The Box Combo", "answer": "Raising Cane's" },
+        { "text": "Chicken Sandwich", "answer": "Chick-fil-A" }
+      ],
+      "400": [
+        { "text": "ShackBurger", "answer": "Shake Shack" },
+        { "text": "ButterBurger", "answer": "Culver's" },
+        { "text": "Whataburger", "answer": "Whataburger" },
+        { "text": "Chickenjoy", "answer": "Jollibee" },
+        { "text": "Crazy Bread", "answer": "Little Caesars" }
+      ],
+      "500": [
+        { "text": "Double-Double", "answer": "In-N-Out Burger" },
+        { "text": "Croissan'Wich", "answer": "Burger King" },
+        { "text": "Jamocha Shake", "answer": "Arby's" },
+        { "text": "Famous Star", "answer": "Carl's Jr. / Hardee's" },
+        { "text": "Timbits", "answer": "Tim Hortons" }
+      ]
+    }
+  }
+]
+                </code></pre>
+            </div>
         </div>
     </div>
 
