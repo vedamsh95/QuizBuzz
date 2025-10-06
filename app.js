@@ -15,7 +15,6 @@ const db = firebase.firestore();
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- DOM Elements ---
     const setupScreen = document.getElementById('setup-screen');
     const gameScreen = document.getElementById('game-screen');
     const playerCountInput = document.getElementById('player-count');
@@ -49,62 +48,89 @@ document.addEventListener('DOMContentLoaded', () => {
     const showRulesBtn = document.getElementById('show-rules-btn');
     const rulesModal = document.getElementById('rules-modal');
     const closeRulesBtn = document.getElementById('close-rules-btn');
-
-    // --- Game State & Settings ---
+    const exitGameBtn = document.getElementById('exit-game-btn');
+    const exitConfirmModal = document.getElementById('exit-confirm-modal');
+    const confirmExitBtn = document.getElementById('confirm-exit-btn');
+    const cancelExitBtn = document.getElementById('cancel-exit-btn');
+    
     let players = [], allCategories = [], selectedCategories = [], gameRounds = [];
     let currentTurn = 0, currentQuestion = null, currentRound = 1;
     let gameMode = 'classic', numRounds = 1, numCategoriesPerRound = 5, totalCategoriesToSelect = 5;
     const DIFFICULTY_LEVELS = [100, 200, 300, 400, 500];
+    let sortable = null;
 
-    // --- FUNCTIONS ---
-    function updateCategorySelectionCount() {
+    function saveGameState() { /* ... */ }
+    function loadGameState() { /* ... */ }
+    function clearGameState() { /* ... */ }
+    function updateCategorySelectionCount() { /* ... */ }
+    async function loadMainCategories() { /* ... */ }
+    function showSubCategories(mainCatName) { /* ... */ }
+    function updateSelectionsSidebar() { /* ... */ }
+    function createPlayerInputs() { /* ... */ }
+    async function handleStartGame() { /* ... */ }
+    function startRound(roundNumber) { /* ... */ }
+    function buildGameBoard() { /* ... */ }
+    function updateScoreboard() { /* ... */ }
+    function showQuestion(question, panel) { /* ... */ }
+    function buildScoringControls() { /* ... */ }
+    function handleSubmitScores() { /* ... */ }
+    function closeModal() { /* ... */ }
+    function endGame() { /* ... */ }
+
+    // --- GAME STATE MANAGEMENT ---
+    saveGameState = function() {
+        const gameState = { players, gameRounds, currentRound, currentTurn, gameMode, numRounds, numCategoriesPerRound };
+        sessionStorage.setItem('quizGameState', JSON.stringify(gameState));
+    }
+    loadGameState = function() {
+        const savedState = sessionStorage.getItem('quizGameState');
+        if (savedState) {
+            const gameState = JSON.parse(savedState);
+            players = gameState.players; gameRounds = gameState.gameRounds; currentRound = gameState.currentRound;
+            currentTurn = gameState.currentTurn; gameMode = gameState.gameMode; numRounds = gameState.numRounds;
+            numCategoriesPerRound = gameState.numCategoriesPerRound;
+            setupScreen.classList.remove('active'); gameScreen.classList.add('active');
+            startRound(currentRound);
+            return true;
+        }
+        return false;
+    }
+    clearGameState = function() { sessionStorage.removeItem('quizGameState'); }
+
+    // --- SETUP FUNCTIONS ---
+    updateCategorySelectionCount = function() {
         numRounds = parseInt(roundCountInput.value) || 1;
         numCategoriesPerRound = parseInt(catPerRoundInput.value) || 5;
         totalCategoriesToSelect = numRounds * numCategoriesPerRound;
         subCategoryLabel.textContent = `SELECT ${totalCategoriesToSelect} SUB-MODULES (${numRounds} R x ${numCategoriesPerRound} C)`;
     }
-
-    async function loadMainCategories() {
+    loadMainCategories = async function() {
         try {
             const snapshot = await db.collection('categories').get();
             allCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             const mainCategories = [...new Set(allCategories.map(cat => cat.mainCategory).filter(Boolean))];
             mainCategorySelection.innerHTML = '';
-            if (mainCategories.length === 0) {
-                mainCategorySelection.innerHTML = '<p>No categories found. Please add some in the admin panel.</p>';
-                return;
-            }
+            if (mainCategories.length === 0) { mainCategorySelection.innerHTML = '<p>No categories found in database.</p>'; return; }
             mainCategories.forEach(mainCat => {
                 const button = document.createElement('button');
-                button.className = 'btn-start-game main-category-btn';
-                button.textContent = mainCat;
+                button.className = 'btn-start-game main-category-btn'; button.textContent = mainCat;
                 button.onclick = () => showSubCategories(mainCat);
                 mainCategorySelection.appendChild(button);
             });
-        } catch (error) {
-            console.error("Error loading categories:", error);
-            mainCategorySelection.innerHTML = '<p style="color:red;">Could not load categories. Check Firestore connection and security rules.</p>';
-        }
+        } catch (error) { console.error("Error loading categories:", error); mainCategorySelection.innerHTML = '<p style="color:red;">Could not load categories.</p>'; }
     }
-
-    function showSubCategories(mainCatName) {
+    showSubCategories = function(mainCatName) {
         const subCategories = allCategories.filter(cat => cat.mainCategory === mainCatName);
         categorySelection.innerHTML = '';
         subCategories.forEach(category => {
             const card = document.createElement('div');
             card.className = 'category-card';
             card.innerHTML = `<input type="checkbox" id="${category.id}" value="${category.name}"><h3>${category.name}</h3><p>${category.description || 'No description.'}</p>`;
-            if (selectedCategories.find(sc => sc.id === category.id)) {
-                card.classList.add('selected');
-                card.querySelector('input').checked = true;
-            }
+            if (selectedCategories.find(sc => sc.id === category.id)) { card.classList.add('selected'); card.querySelector('input').checked = true; }
             card.addEventListener('click', () => {
                 const isSelected = card.classList.contains('selected');
-                if (!isSelected && selectedCategories.length >= totalCategoriesToSelect) {
-                    alert(`SYSTEM LIMIT: ${totalCategoriesToSelect} SUB-MODULES MAX.`); return;
-                }
-                card.classList.toggle('selected');
-                card.querySelector('input').checked = !isSelected;
+                if (!isSelected && selectedCategories.length >= totalCategoriesToSelect) { alert(`SYSTEM LIMIT: ${totalCategoriesToSelect} SUB-MODULES MAX.`); return; }
+                card.classList.toggle('selected'); card.querySelector('input').checked = !isSelected;
                 if (!isSelected) { selectedCategories.push(category); } 
                 else { selectedCategories = selectedCategories.filter(sc => sc.id !== category.id); }
                 updateSelectionsSidebar();
@@ -114,53 +140,64 @@ document.addEventListener('DOMContentLoaded', () => {
         mainCategoryView.classList.add('hidden');
         subCategoryView.classList.remove('hidden');
     }
-
-    function updateSelectionsSidebar() {
+    updateSelectionsSidebar = function() {
         if (selectedCategories.length === 0) {
-            selectionsContainer.innerHTML = `<p class="selections-placeholder">Select up to ${totalCategoriesToSelect} sub-modules.</p>`; return;
+            selectionsContainer.innerHTML = `<p class="selections-placeholder">Select up to ${totalCategoriesToSelect} sub-modules.</p>`;
+            if (sortable) sortable.destroy(); return;
         }
         selectionsContainer.innerHTML = '';
-        selectedCategories.forEach(cat => {
-            const item = document.createElement('div');
-            item.className = 'selection-item';
-            item.innerHTML = `<span>${cat.name}</span><button class="remove-btn" data-id="${cat.id}">&times;</button>`;
-            selectionsContainer.appendChild(item);
-        });
+        for (let i = 0; i < numRounds; i++) {
+            const roundNum = i + 1;
+            const divider = document.createElement('div'); divider.className = 'round-divider'; divider.textContent = `ROUND ${roundNum}`;
+            selectionsContainer.appendChild(divider);
+            const roundCategories = selectedCategories.slice(i * numCategoriesPerRound, roundNum * numCategoriesPerRound);
+            roundCategories.forEach(cat => {
+                const item = document.createElement('div');
+                item.className = 'selection-item'; item.dataset.id = cat.id; 
+                item.innerHTML = `<span>${cat.name}</span><button class="remove-btn" data-id="${cat.id}">&times;</button>`;
+                selectionsContainer.appendChild(item);
+            });
+        }
         selectionsContainer.querySelectorAll('.remove-btn').forEach(btn => {
-            btn.onclick = (e) => {
-                const categoryId = e.target.dataset.id;
-                const cardCheckbox = document.getElementById(categoryId);
-                if (cardCheckbox) cardCheckbox.closest('.category-card').click();
-            };
+            btn.onclick = (e) => { e.stopPropagation(); const categoryId = e.target.dataset.id; const cardCheckbox = document.getElementById(categoryId); if (cardCheckbox) cardCheckbox.closest('.category-card').click(); };
         });
+        if (selectedCategories.length === totalCategoriesToSelect) {
+            if (sortable) sortable.destroy();
+            sortable = new Sortable(selectionsContainer, {
+                animation: 150, ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+                onEnd: function () {
+                    const newOrderIds = Array.from(selectionsContainer.querySelectorAll('.selection-item')).map(item => item.dataset.id);
+                    selectedCategories.sort((a, b) => newOrderIds.indexOf(a.id) - newOrderIds.indexOf(b.id));
+                    updateSelectionsSidebar();
+                },
+            });
+        } else { if (sortable) sortable.destroy(); }
     }
-
-    function createPlayerInputs() {
+    createPlayerInputs = function() {
         const count = playerCountInput.value;
         playerNamesContainer.innerHTML = '';
         for (let i = 1; i <= count; i++) {
             const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = `Player ${i} Identifier`;
+            input.type = 'text'; input.placeholder = `Player ${i} Identifier`;
             playerNamesContainer.appendChild(input);
         }
     }
 
-    async function handleStartGame() {
+    // --- GAMEPLAY FUNCTIONS ---
+    handleStartGame = async function() {
         players = Array.from(document.querySelectorAll('#player-names-container input')).map((input, i) => ({ name: input.value || `Player ${i + 1}`, score: 0 }));
         if (selectedCategories.length !== totalCategoriesToSelect) { alert(`Please select exactly ${totalCategoriesToSelect} sub-categories.`); return; }
         
         const processedCategories = [];
         for (const category of selectedCategories) {
-            const processedCategory = { ...category, questions: {} };
-            let isComplete = true;
+            const processedCategory = { ...category, questions: {} }; let isComplete = true;
             for (const level of DIFFICULTY_LEVELS) {
                 const questionPool = category.questions[level];
                 if (!questionPool || questionPool.length === 0) { isComplete = false; break; }
                 const randomIndex = Math.floor(Math.random() * questionPool.length);
                 processedCategory.questions[level] = questionPool[randomIndex];
             }
-            if (!isComplete) { alert(`The category "${category.name}" is missing questions. Please complete it in the admin panel.`); return; }
+            if (!isComplete) { alert(`The category "${category.name}" is missing questions.`); return; }
             processedCategories.push(processedCategory);
         }
         
@@ -170,109 +207,87 @@ document.addEventListener('DOMContentLoaded', () => {
             gameRounds.push(roundCategories);
         }
         
-        setupScreen.classList.remove('active');
-        gameScreen.classList.add('active');
+        setupScreen.classList.remove('active'); gameScreen.classList.add('active');
         currentTurn = Math.floor(Math.random() * players.length);
         startRound(1);
+        saveGameState();
     }
-
-    function startRound(roundNumber) {
-        currentRound = roundNumber;
-        roundTitle.textContent = `// ROUND ${currentRound} / ${numRounds}`;
-        buildGameBoard();
-        updateScoreboard();
-    }
-
-    function buildGameBoard() {
+    startRound = function(roundNumber) { currentRound = roundNumber; roundTitle.textContent = `// ROUND ${currentRound} / ${numRounds}`; buildGameBoard(); updateScoreboard(); }
+    buildGameBoard = function() {
         gameBoard.innerHTML = '';
         const currentRoundCategories = gameRounds[currentRound - 1];
         currentRoundCategories.forEach((category, index) => {
-            const column = document.createElement('div');
-            column.className = `category-column category-${index + 1}`;
-            const header = document.createElement('div');
-            header.className = 'category-header';
-            header.textContent = category.name;
+            const column = document.createElement('div'); column.className = `category-column category-${index + 1}`;
+            const header = document.createElement('div'); header.className = 'category-header'; header.textContent = category.name;
             column.appendChild(header);
-            
             let difficulties = [...DIFFICULTY_LEVELS];
             if (gameMode === 'mystery') difficulties.sort(() => Math.random() - 0.5);
-
             difficulties.forEach(level => {
-                const q = category.questions[level]; q.points = level;
-                const panel = document.createElement('button');
-                panel.className = 'question-panel';
-                if (gameMode === 'mystery') { panel.textContent = '?'; panel.classList.add('mystery'); } 
-                else { panel.textContent = level; }
-                panel.addEventListener('click', () => showQuestion(q, panel), { once: true });
-                column.appendChild(panel);
+                const q = category.questions[level];
+                if (q.answered) {
+                    const panel = document.createElement('div'); panel.className = 'question-panel disabled'; column.appendChild(panel);
+                } else {
+                    const panel = document.createElement('button'); panel.className = 'question-panel';
+                    if (gameMode === 'mystery') { panel.textContent = '?'; panel.classList.add('mystery'); } 
+                    else { panel.textContent = level; }
+                    q.points = level;
+                    panel.addEventListener('click', () => showQuestion(q, panel), { once: true });
+                    column.appendChild(panel);
+                }
             });
             gameBoard.appendChild(column);
         });
     }
-
-    function updateScoreboard() {
+    updateScoreboard = function() {
         scoreboardPlayers.innerHTML = '';
         players.forEach((player, index) => {
-            const scoreDiv = document.createElement('div');
-            scoreDiv.className = 'player-score';
+            const scoreDiv = document.createElement('div'); scoreDiv.className = 'player-score';
             if (index === currentTurn) scoreDiv.classList.add('active');
             scoreDiv.innerHTML = `<span class="player-name">${player.name}</span><span class="score-value">${player.score}</span>`;
             scoreboardPlayers.appendChild(scoreDiv);
         });
         turnIndicator.textContent = `ACTIVE PLAYER TO CHOOSE: ${players[currentTurn].name}`;
     }
-
-    function showQuestion(question, panel) {
-        currentQuestion = question;
-        questionText.textContent = question.text;
-        questionPointsEl.textContent = `${question.points} POINTS`;
-        answerText.textContent = question.answer;
-        questionCard.classList.remove('is-flipped');
-        modalOverlay.classList.add('active');
-        panel.classList.add('disabled');
-        panel.textContent = '';
+    showQuestion = function(question, panel) {
+        currentQuestion = question; question.answered = true; saveGameState();
+        questionText.textContent = question.text; questionPointsEl.textContent = `${question.points} POINTS`;
+        answerText.textContent = question.answer; questionCard.classList.remove('is-flipped');
+        modalOverlay.classList.add('active'); panel.classList.add('disabled'); panel.textContent = '';
     }
-
-    function buildScoringControls() {
+    buildScoringControls = function() {
         playerScoringContainer.innerHTML = '';
         players.forEach((player, index) => {
-            const controlDiv = document.createElement('div');
-            controlDiv.className = 'player-score-control';
+            const controlDiv = document.createElement('div'); controlDiv.className = 'player-score-control';
             controlDiv.innerHTML = `<span class="player-name">${player.name}</span><div class="control-buttons" data-player-index="${index}"><button class="btn-correct">✅</button><button class="btn-incorrect">❌</button></div>`;
             playerScoringContainer.appendChild(controlDiv);
         });
         playerScoringContainer.querySelectorAll('.control-buttons').forEach(div => {
-            const correctBtn = div.querySelector('.btn-correct');
-            const incorrectBtn = div.querySelector('.btn-incorrect');
+            const correctBtn = div.querySelector('.btn-correct'); const incorrectBtn = div.querySelector('.btn-incorrect');
             correctBtn.addEventListener('click', () => { correctBtn.classList.toggle('selected'); incorrectBtn.classList.remove('selected'); });
             incorrectBtn.addEventListener('click', () => { incorrectBtn.classList.toggle('selected'); correctBtn.classList.remove('selected'); });
         });
     }
-
-    function handleSubmitScores() {
+    handleSubmitScores = function() {
         const points = currentQuestion.points;
         playerScoringContainer.querySelectorAll('.control-buttons').forEach(div => {
             const playerIndex = parseInt(div.dataset.playerIndex);
             if (div.querySelector('.btn-correct').classList.contains('selected')) players[playerIndex].score += points;
             else if (div.querySelector('.btn-incorrect').classList.contains('selected')) players[playerIndex].score -= points;
         });
-        closeModal();
+        closeModal(); saveGameState();
     }
-
-    function closeModal() {
+    closeModal = function() {
         modalOverlay.classList.remove('active');
         updateScoreboard();
         if (document.querySelectorAll('.question-panel:not(.disabled)').length === 0) {
             if (currentRound < numRounds) {
                 alert(`Round ${currentRound} complete! Get ready for Round ${currentRound + 1}.`);
                 startRound(currentRound + 1);
-            } else {
-                endGame();
-            }
+            } else { endGame(); }
         }
     }
-
-    function endGame() {
+    endGame = function() {
+        clearGameState();
         const highestScore = Math.max(...players.map(p => p.score));
         const winners = players.filter(p => p.score === highestScore);
         if (winners.length === 1) { winnerAnnouncement.textContent = `SYSTEM VICTOR: ${winners[0].name}`; } 
@@ -288,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gameOverModal.classList.add('active');
     }
 
-    // --- Initial Load and Event Listeners ---
+    // --- EVENT LISTENERS ---
     playerCountInput.addEventListener('change', createPlayerInputs);
     roundCountInput.addEventListener('change', updateCategorySelectionCount);
     catPerRoundInput.addEventListener('change', updateCategorySelectionCount);
@@ -297,14 +312,19 @@ document.addEventListener('DOMContentLoaded', () => {
     startGameBtn.addEventListener('click', handleStartGame);
     revealAnswerBtn.addEventListener('click', () => { questionCard.classList.add('is-flipped'); buildScoringControls(); });
     submitScoresBtn.addEventListener('click', handleSubmitScores);
-    playAgainBtn.addEventListener('click', () => window.location.reload());
+    playAgainBtn.addEventListener('click', () => { clearGameState(); window.location.reload(); });
     showRulesBtn.addEventListener('click', () => rulesModal.classList.add('active'));
     closeRulesBtn.addEventListener('click', () => rulesModal.classList.remove('active'));
     rulesModal.addEventListener('click', (e) => { if (e.target === rulesModal) rulesModal.classList.remove('active'); });
-
-    // Initial function calls
-    createPlayerInputs();
-    loadMainCategories();
-    updateSelectionsSidebar();
-    updateCategorySelectionCount();
+    exitGameBtn.addEventListener('click', () => exitConfirmModal.classList.add('active'));
+    cancelExitBtn.addEventListener('click', () => exitConfirmModal.classList.remove('active'));
+    confirmExitBtn.addEventListener('click', () => { clearGameState(); window.location.reload(); });
+    
+    // --- INITIAL LOAD ---
+    if (!loadGameState()) {
+        createPlayerInputs();
+        loadMainCategories();
+        updateSelectionsSidebar();
+        updateCategorySelectionCount();
+    }
 });

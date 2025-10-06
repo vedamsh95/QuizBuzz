@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz // ARCHITECT</title>
+    <title>Quiz Gambit</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,8 +39,15 @@
     </div>
 
     <div id="game-screen" class="screen">
-        <main id="game-area"><h2 id="round-title"></h2><div id="game-board"></div><div id="turn-indicator"></div></main>
-        <aside id="scoreboard-area"><h2 class="scoreboard-title">> SCORE_LOG</h2><div id="scoreboard-players"></div></aside>
+        <main id="game-area">
+            <div class="game-header">
+                <h2 id="round-title"></h2>
+                <button id="exit-game-btn" class="btn btn-secondary">Exit to Menu</button>
+            </div>
+            <div id="game-board"></div>
+            <div id="turn-indicator"></div>
+        </main>
+        <aside id="scoreboard-area"><h2 class="scoreboard-title">> SCOREBOARD </h2><div id="scoreboard-players"></div></aside>
     </div>
 
     <div id="question-modal-overlay" class="modal-overlay">
@@ -62,9 +69,20 @@
             <div class="rules-section"><h3>Mystery Arena Mode</h3><p>All point values are hidden (`?`) and randomized. Gameplay follows a Classic Arena variation, or this exclusive one:</p><h4>Suggested Variation: Pass or Play</h4><ul><li>The active player chooses a mystery panel.</li><li><strong>Before the question is revealed</strong>, they must decide: **"Play"** it themselves or **"Pass"** it to the next player.</li><li>If they **Play**, only they can answer. If correct, they keep control.</li><li>If they **Pass**, only the next player can answer. If that player is correct, *they* gain control.</li><li>If the answering player is incorrect, control passes to the next person in the original turn order.</li></ul></div>
         </div>
     </div>
+    <div id="exit-confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="main-title" style="font-size: 1.8rem; margin-top: 0;">EXIT SESSION</h2>
+            <p>Are you sure you want to exit? All current game progress will be lost.</p>
+            <div class="modal-actions">
+                <button id="confirm-exit-btn" class="btn btn-danger">Yes, Exit</button>
+                <button id="cancel-exit-btn" class="btn">Stay</button>
+            </div>
+        </div>
+    </div>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
