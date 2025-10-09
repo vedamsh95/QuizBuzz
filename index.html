@@ -40,10 +40,7 @@
 
     <div id="game-screen" class="screen">
         <main id="game-area">
-            <div class="game-header">
-                <h2 id="round-title"></h2>
-                <button id="exit-game-btn" class="btn btn-secondary">Exit to Menu</button>
-            </div>
+            <div class="game-header"><h2 id="round-title"></h2><button id="exit-game-btn" class="btn btn-secondary">Exit to Menu</button></div>
             <div id="game-board"></div>
             <div id="turn-indicator"></div>
         </main>
@@ -52,8 +49,24 @@
 
     <div id="question-modal-overlay" class="modal-overlay">
         <div id="question-card">
-            <div class="card-face card-front"><p id="question-points"></p><h2 id="question-text"></h2><button id="reveal-answer-btn" class="btn">DECRYPT ANSWER</button></div>
-            <div class="card-face card-back"><h2 id="answer-title">> ANSWER:</h2><p id="answer-text"></p><div id="scoring-controls"><label>AWARD POINTS</label><div id="player-scoring-container"></div><button id="submit-scores-btn" class="btn">Submit Scores & Continue</button></div></div>
+            <div class="card-face card-front">
+                <div class="card-content-wrapper">
+                    <p id="question-points"></p>
+                    <h2 id="question-text"></h2>
+                    <button id="reveal-answer-btn" class="btn">REVEAL ANSWER</button>
+                </div>
+            </div>
+            <div class="card-face card-back">
+                <div class="card-content-wrapper">
+                    <h2 id="answer-title">> ANSWER:</h2>
+                    <p id="answer-text"></p>
+                    <div id="scoring-controls">
+                        <label>AWARD POINTS</label>
+                        <div id="player-scoring-container"></div>
+                        <button id="submit-scores-btn" class="btn">Submit Scores & Continue</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div id="game-over-modal" class="modal-overlay">
